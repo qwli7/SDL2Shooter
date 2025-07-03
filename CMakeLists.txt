@@ -22,7 +22,7 @@ find_package(SDL2_mixer REQUIRED)
 #设置输出目标名称
 set(TARGET ${PROJECT_NAME}-${CMAKE_SYSTEM_NAME})
 # 添加可执行目录
-add_executable(${TARGET} src/main.cpp)
+add_executable(${TARGET} src/main.cpp src/Game.cpp)
 
 # 添加链接库
 target_link_libraries(${TARGET} PRIVATE SDL2::SDL2 
