@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_ttf.h>
 
 // 防止main函数被SDL2库重定义
 #undef main
@@ -66,6 +67,19 @@ int main()
         return -1;
     }
 
+    // 打开字体文件
+    if (TTF_Init() != 0)
+    {
+        SDL_Log("TTF_Init Error: %s", TTF_GetError());
+        return -1;
+    }
+    // 加载字体文件
+    TTF_Font *font = TTF_OpenFont("assets/font/VonwaonBitmap-12px.ttf", 24);
+    if (font == nullptr)
+    {
+        SDL_Log("TTF_OpenFont Error: %s", TTF_GetError());
+        return -1;
+    }
     // 播放音乐, -1表示循环播放
     Mix_PlayMusic(music, -1);
 
@@ -78,6 +92,21 @@ int main()
     SDL_Rect fillRect = {150, 150, 100, 100};
 
     SDL_Rect imgDstRect = {300, 300, 100, 100};
+
+    // 文字配置
+    SDL_Color textColor = {255, 128, 122, 255};
+    SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font, "Hello SDL2，中文测试", textColor);
+    if (textSurface == nullptr)
+    {
+        SDL_Log("TTF_RenderText_Blended Error: %s", TTF_GetError());
+        return -1;
+    }
+    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    if (textTexture == nullptr)
+    {
+        SDL_Log("SDL_CreateTextureFromSurface Error: %s", SDL_GetError());
+        return -1;
+    }
 
     // 主循环
     bool isRunning = true;
@@ -105,9 +134,22 @@ int main()
         // 绘制图片纹理
         SDL_RenderCopy(renderer, imageTexture, nullptr, &imgDstRect);
 
+        // 绘制文字
+        // SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+        SDL_Rect textRect = {400, 400, 0, 0};
+        SDL_QueryTexture(textTexture, nullptr, nullptr, &textRect.w, &textRect.h);
+        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+
         // 交换缓冲区
         SDL_RenderPresent(renderer);
     }
+
+    // 释放字体资源
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+
+    TTF_CloseFont(font);
+    TTF_Quit();
 
     // 释放音频资源
     Mix_FreeMusic(music);
